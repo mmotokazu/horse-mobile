@@ -299,35 +299,40 @@ with tab_track:
 # 【タブ2】🏇 愛馬カルテ（戦績 ＆ 3ヶ月近況）
 # ====================================================
 with tab_karte:
-    # 1. 滞在拠点ラジオボタンフィルター（ユーザー指定: 全現役馬、トレセン在厩（デフォルト）、外厩ほか）
-    filter_options = ["全現役馬", "トレセン在厩", "外厩ほか"]
+    # 1. 滞在拠点ラジオボタンフィルター（ユーザー指定: トレセン在厩（先頭・デフォルト）、外厩ほか、全現役馬）
+    filter_options = ["トレセン在厩", "外厩ほか", "全現役馬"]
 
-    # セッションフィルターの初期化（デフォルトは「トレセン在厩」）
-    if "radio_karte_filter" not in st.session_state:
-        st.session_state.radio_karte_filter = "トレセン在厩"
-
-    # 他画面（出走バナー等）からの明示的なジャンプ遷移の判定
+    # 他画面（出走バナー等）からの明示的なジャンプ遷移の処理
     jump_horse = st.session_state.pop("jump_target_horse", None)
     if jump_horse and jump_horse in horses:
         h_cat = horses[jump_horse].get("category", "")
         # ジャンプ先馬の所属カテゴリに合わせてラジオボタンも連動
-        st.session_state.radio_karte_filter = "トレセン在厩" if h_cat == "トレセン在厩" else "外厩ほか"
+        jump_filter = "トレセン在厩" if h_cat == "トレセン在厩" else "外厩ほか"
+        st.session_state["radio_karte_filter"] = jump_filter
+        st.session_state[f"sb_horse_{jump_filter}"] = jump_horse
         is_jump = True
     else:
         is_jump = False
 
-    # ラジオボタンの描画
+    # セッションフィルターの初期化（デフォルトは「トレセン在厩」）
+    if "radio_karte_filter" not in st.session_state:
+        st.session_state["radio_karte_filter"] = "トレセン在厩"
+
+    # ラジオボタン切り替え時に該当フィルターの選択馬を最多賞金馬にリセットするコールバック
+    def on_filter_change():
+        """ラジオボタンで絞り込みを切り替えた際、常にそのカテゴリ内の最多賞金馬へ自動リセットします"""
+        new_filter = st.session_state.get("radio_karte_filter")
+        if new_filter:
+            st.session_state.pop(f"sb_horse_{new_filter}", None)
+
+    # ラジオボタンの描画（トレセン在厩がデフォルト・先頭）
     selected_filter = st.radio(
         "絞り込み表示",
         filter_options,
         horizontal=True,
-        key="radio_karte_filter"
+        key="radio_karte_filter",
+        on_change=on_filter_change
     )
-
-    # フィルター切り替えの検知（前回と異なる場合は最多賞金馬へ自動リセット）
-    prev_filter = st.session_state.get("prev_karte_filter")
-    filter_changed = (prev_filter is not None and prev_filter != selected_filter)
-    st.session_state.prev_karte_filter = selected_filter
 
     # 2. 選択されたフィルターに基づく対象馬の抽出
     if selected_filter == "トレセン在厩":
@@ -346,29 +351,30 @@ with tab_karte:
         # 4. 最多賞金獲得馬の取得
         top_prize_horse = get_top_prize_horse(sorted_names, horses)
 
-        # 表示する馬の決定ロジック（ユーザー指定: カルテ選択時・ラジオボタン絞り込み時は最多賞金馬を最優先）
+        # フィルターごとに独立したセレクターキーを用いて前回の選択残留を根本排除
+        sb_key = f"sb_horse_{selected_filter}"
+
+        # 表示する馬の決定ロジック
         if is_jump and jump_horse in sorted_names:
             # 他画面のカード・バナーからジャンプした場合は、その馬を表示
             target_horse = jump_horse
-        elif filter_changed or "sb_horse_select" not in st.session_state or st.session_state.get("selected_horse") not in sorted_names:
-            # ラジオボタンで絞り込みを切り替えた時、または初回表示時は【最多賞金獲得馬】を自動選択
-            target_horse = top_prize_horse
+            st.session_state[sb_key] = jump_horse
+        elif sb_key in st.session_state and st.session_state[sb_key] in sorted_names:
+            # 同一フィルター内でユーザーがプルダウンから選択した馬を保持
+            target_horse = st.session_state[sb_key]
         else:
-            # ユーザーが同一フィルター内で明示的にselectboxを操作した場合はその馬を維持
-            target_horse = st.session_state.get("selected_horse", top_prize_horse)
-
-        # selectboxの内部キー状態も確実に同期更新して表示ブレを防止
-        st.session_state["sb_horse_select"] = target_horse
-        st.session_state.selected_horse = target_horse
+            # カルテ選択時、またはラジオボタン切り替え時は【最多賞金獲得馬】を必ず自動選択
+            target_horse = top_prize_horse
+            st.session_state[sb_key] = top_prize_horse
 
         curr_idx = sorted_names.index(target_horse) if target_horse in sorted_names else 0
 
-        # 馬名セレクター（五十音順）
+        # 馬名セレクター（五十音順、初期表示は最多賞金獲得馬）
         selected_name = st.selectbox(
             f"愛馬を選択 ({len(sorted_names)}頭 / 五十音順)",
             sorted_names,
             index=curr_idx,
-            key="sb_horse_select"
+            key=sb_key
         )
         st.session_state.selected_horse = selected_name
 

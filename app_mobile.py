@@ -197,6 +197,10 @@ if "selected_horse" not in st.session_state:
 # ----------------------------------------------------
 NAV_TABS = ["🎯 出走予定 ＆ 動向", "🏇 愛馬カルテ"]
 
+# ジャンプ予約がある場合、ウィジェット描画前に適用（StreamlitWidgetAlreadyInstantiatedError完全防止）
+if "pending_nav_tab" in st.session_state:
+    st.session_state["nav_tab_radio"] = st.session_state.pop("pending_nav_tab")
+
 if "nav_tab_radio" not in st.session_state:
     st.session_state["nav_tab_radio"] = NAV_TABS[0]
 
@@ -256,11 +260,9 @@ if current_nav_tab == NAV_TABS[0]:
 
             # カルテへジャンプするボタン（ユーザー指定: 全現役馬の該当馬を開く）
             if st.button(f"🏇 {tw['horse_name']} のカルテを開く", key=f"btn_tw_{tw['horse_name']}", width="stretch"):
-                st.session_state["nav_tab_radio"] = NAV_TABS[1]
-                st.session_state["radio_karte_filter"] = "全現役馬"
-                st.session_state.jump_target_horse = tw['horse_name']
-                st.session_state.selected_horse = tw['horse_name']
-                st.session_state.pop("sb_select_全現役馬", None)
+                st.session_state["pending_nav_tab"] = NAV_TABS[1]
+                st.session_state["pending_filter"] = "全現役馬"
+                st.session_state["pending_horse"] = tw['horse_name']
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
@@ -300,11 +302,9 @@ if current_nav_tab == NAV_TABS[0]:
 
             # カルテへジャンプするボタン（ユーザー指定: 全現役馬の該当馬を開く）
             if st.button(f"🏇 {cal['horse_name']} のカルテを開く", key=f"btn_cal_{cal['horse_name']}", width="stretch"):
-                st.session_state["nav_tab_radio"] = NAV_TABS[1]
-                st.session_state["radio_karte_filter"] = "全現役馬"
-                st.session_state.jump_target_horse = cal['horse_name']
-                st.session_state.selected_horse = cal['horse_name']
-                st.session_state.pop("sb_select_全現役馬", None)
+                st.session_state["pending_nav_tab"] = NAV_TABS[1]
+                st.session_state["pending_filter"] = "全現役馬"
+                st.session_state["pending_horse"] = cal['horse_name']
                 st.rerun()
 
     st.markdown("<hr style='margin: 14px 0 10px 0;'>", unsafe_allow_html=True)
@@ -354,9 +354,11 @@ else:
             st.session_state.pop(f"sb_select_{opt}", None)
 
     # 他画面（出走バナー等）からの明示的なジャンプ遷移の処理（ユーザー指定: 全現役馬の該当馬を開く）
-    jump_horse = st.session_state.pop("jump_target_horse", None)
+    if "pending_filter" in st.session_state:
+        st.session_state["radio_karte_filter"] = st.session_state.pop("pending_filter")
+
+    jump_horse = st.session_state.pop("pending_horse", None)
     if jump_horse and jump_horse in horses:
-        st.session_state["radio_karte_filter"] = "全現役馬"
         st.session_state.pop("sb_select_全現役馬", None)
         is_jump = True
     else:

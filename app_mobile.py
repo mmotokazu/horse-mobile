@@ -148,10 +148,26 @@ st.markdown("<hr style='margin: 8px 0 12px 0;'>", unsafe_allow_html=True)
 
 
 # ----------------------------------------------------
+# 補助関数: 最多賞金獲得馬の判定
+# ----------------------------------------------------
+def get_top_prize_horse(names_list: list, horses_dict: dict) -> str:
+    """
+    与えられた馬名リストの中から、獲得賞金（prize_man）が最大の愛馬名を返します。
+    （※ドメイン規約第2条に準拠し、出資口数に依存しない馬自身の総獲得賞金を基準とします）
+    """
+    if not names_list:
+        return ""
+    # prize_man降順、同額時は五十音順
+    return max(names_list, key=lambda name: (horses_dict.get(name, {}).get("prize_man", 0.0), -ord(name[0]) if name else 0))
+
+
+# ----------------------------------------------------
 # セッション状態管理（タブ切り替え ＆ 愛馬選択）
 # ----------------------------------------------------
 if "selected_horse" not in st.session_state:
-    st.session_state.selected_horse = list(horses.keys())[0] if horses else ""
+    # 初期表示: トレセン在厩馬の中の最多賞金馬（不在時は全頭中最多賞金馬）
+    tc_names = [k for k, v in horses.items() if v.get("category") == "トレセン在厩"]
+    st.session_state.selected_horse = get_top_prize_horse(tc_names, horses) or get_top_prize_horse(list(horses.keys()), horses)
 
 # クエリパラメータ連動
 query_params = st.query_params
@@ -271,40 +287,96 @@ with tab_track:
 # 【タブ2】🏇 愛馬カルテ（戦績 ＆ 3ヶ月近況）
 # ====================================================
 with tab_karte:
-    horse_names = list(horses.keys())
-    
-    # 馬名セレクター
-    curr_idx = horse_names.index(st.session_state.selected_horse) if st.session_state.selected_horse in horse_names else 0
-    selected_name = st.selectbox("愛馬を選択", horse_names, index=curr_idx, key="sb_horse_select")
-    st.session_state.selected_horse = selected_name
+    # 1. 滞在拠点ラジオボタンフィルター（ユーザー指定: 全現役馬、トレセン在厩（デフォルト）、外厩ほか）
+    filter_options = ["全現役馬", "トレセン在厩", "外厩ほか"]
 
-    horse = horses.get(selected_name, {})
-    theme = get_club_theme(horse.get("club", ""))
+    # セッションフィルターの初期化（デフォルトは「トレセン在厩」）
+    if "karte_filter" not in st.session_state:
+        st.session_state.karte_filter = "トレセン在厩"
 
-    # 基本プロファイルカード
-    wt_str = f"⚖️ {horse.get('weight')}" if horse.get('weight') and horse.get('weight') != "-" else "体重 -"
-    tgt_info = f"🎯 次走目標: <b>{horse['target_race']}</b>" if horse.get('target_race') else "次走: 未定"
+    # もし他タブやリンクから選ばれた馬が「トレセン在厩」以外の場合、自動追従
+    curr_target = st.session_state.get("selected_horse", "")
+    if curr_target and curr_target in horses:
+        h_cat = horses[curr_target].get("category", "")
+        if st.session_state.karte_filter == "トレセン在厩" and h_cat != "トレセン在厩":
+            st.session_state.karte_filter = "外厩ほか"
 
-    st.markdown(f"""
-    <div style="background: white; border: 1px solid #cbd5e1; border-top: 5px solid {theme['border']}; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <span style="font-weight:900; font-size:1.15rem; color:#0f172a;">{horse.get('horse_name')}</span>
-            <span style="font-size:0.75rem; background:{theme['bg_badge']}; color:{theme['text_badge']}; padding:2px 7px; border-radius:3px; font-weight:700; margin-left:6px;">{theme['short_name']}</span>
+    # ラジオボタンのインデックス判定
+    default_f_idx = filter_options.index(st.session_state.karte_filter) if st.session_state.karte_filter in filter_options else 1
+
+    selected_filter = st.radio(
+        "絞り込み表示",
+        filter_options,
+        index=default_f_idx,
+        horizontal=True,
+        key="radio_karte_filter"
+    )
+    st.session_state.karte_filter = selected_filter
+
+    # 2. 選択されたフィルターに基づく対象馬の抽出
+    if selected_filter == "トレセン在厩":
+        filtered_names = [name for name, h in horses.items() if h.get("category") == "トレセン在厩"]
+    elif selected_filter == "外厩ほか":
+        filtered_names = [name for name, h in horses.items() if h.get("category") != "トレセン在厩"]
+    else:
+        filtered_names = list(horses.keys())
+
+    # 3. 並び順はアイウエオ順（五十音順）
+    sorted_names = sorted(filtered_names)
+
+    if not sorted_names:
+        st.info("該当する愛馬はいません。")
+    else:
+        # 4. デフォルト表示は最多賞金獲得馬（選択馬がリストにない場合のフォールバック）
+        top_prize_horse = get_top_prize_horse(sorted_names, horses)
+        
+        # 現在選択中の馬が絞り込みリストにない場合は、該当リスト内の最多賞金馬をデフォルトにする
+        if st.session_state.get("selected_horse") not in sorted_names:
+            st.session_state.selected_horse = top_prize_horse
+
+        curr_horse_name = st.session_state.selected_horse
+        curr_idx = sorted_names.index(curr_horse_name) if curr_horse_name in sorted_names else 0
+
+        # 馬名セレクター（五十音順）
+        selected_name = st.selectbox(
+            f"愛馬を選択 ({len(sorted_names)}頭 / 五十音順)",
+            sorted_names,
+            index=curr_idx,
+            key="sb_horse_select"
+        )
+        st.session_state.selected_horse = selected_name
+
+        horse = horses.get(selected_name, {})
+        theme = get_club_theme(horse.get("club", ""))
+
+        # 基本プロファイルカード
+        wt_str = f"⚖️ {horse.get('weight')}" if horse.get('weight') and horse.get('weight') != "-" else "体重 -"
+        tgt_info = f"🎯 次走目標: <b>{horse['target_race']}</b>" if horse.get('target_race') else "次走: 未定"
+
+        # 獲得賞金のフォーマット表示
+        p_val = horse.get("prize_man", 0.0)
+        prize_str = f"獲得賞金: {p_val:,.0f}万円" if p_val > 0 else "獲得賞金: -"
+
+        st.markdown(f"""
+        <div style="background: white; border: 1px solid #cbd5e1; border-top: 5px solid {theme['border']}; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <span style="font-weight:900; font-size:1.15rem; color:#0f172a;">{horse.get('horse_name')}</span>
+                <span style="font-size:0.75rem; background:{theme['bg_badge']}; color:{theme['text_badge']}; padding:2px 7px; border-radius:3px; font-weight:700; margin-left:6px;">{theme['short_name']}</span>
+            </div>
+            <span style="font-size:0.78rem; color:#059669; font-weight:800; background:#ecfdf5; padding:2px 8px; border-radius:4px;">{horse.get('category')}</span>
         </div>
-        <span style="font-size:0.78rem; color:#059669; font-weight:800; background:#ecfdf5; padding:2px 8px; border-radius:4px;">{horse.get('category')}</span>
-    </div>
-    <div style="font-size:0.82rem; color:#475569; margin-top:6px;">
-        🏛️ {horse.get('trainer')} ｜ 📍 {horse.get('facility')} ｜ {wt_str}
-    </div>
-    <div style="font-size:0.78rem; color:#64748b; margin-top:2px;">
-        血統: {horse.get('sire')} × {horse.get('dam')} ｜ 募集価格: {horse.get('price_man')}万円
-    </div>
-    <div style="font-size:0.84rem; color:#b91c1c; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">
-        {tgt_info}
-    </div>
-    </div>
-    """, unsafe_allow_html=True)
+        <div style="font-size:0.82rem; color:#475569; margin-top:6px;">
+            🏛️ {horse.get('trainer')} ｜ 📍 {horse.get('facility')} ｜ {wt_str}
+        </div>
+        <div style="font-size:0.78rem; color:#64748b; margin-top:2px;">
+            血統: {horse.get('sire')} × {horse.get('dam')} ｜ 募集価格: {horse.get('price_man')}万円 ｜ 💰 {prize_str}
+        </div>
+        <div style="font-size:0.84rem; color:#b91c1c; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">
+            {tgt_info}
+        </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # サブセクション: 確定戦績テーブル
     races = horse.get("races", [])

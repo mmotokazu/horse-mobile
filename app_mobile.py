@@ -75,9 +75,8 @@ def get_club_theme(club_name: str):
 
 
 # ----------------------------------------------------
-# データ読み込み
+# データ読み込み（キャッシュ事故防止のため常に最新JSONを直接読込）
 # ----------------------------------------------------
-@st.cache_data
 def load_mobile_data():
     data_path = Path(__file__).resolve().parent / "data" / "mobile_uma_data.json"
     if not data_path.exists():
@@ -302,15 +301,19 @@ with tab_karte:
     # 1. 滞在拠点ラジオボタンフィルター（ユーザー指定: トレセン在厩（先頭・デフォルト）、外厩ほか、全現役馬）
     filter_options = ["トレセン在厩", "外厩ほか", "全現役馬"]
 
+    # ラジオボタン切り替え時にセレクターの記憶をクリアし、100%確実に最多賞金馬を表示するコールバック
+    def on_filter_change():
+        """ラジオボタンで絞り込みを切り替えた際、全フィルターのセレクター記憶を消去して最多賞金馬へ強制初期化"""
+        for opt in filter_options:
+            st.session_state.pop(f"sb_select_{opt}", None)
+
     # 他画面（出走バナー等）からの明示的なジャンプ遷移の処理
     jump_horse = st.session_state.pop("jump_target_horse", None)
     if jump_horse and jump_horse in horses:
         h_cat = horses[jump_horse].get("category", "")
-        # ジャンプ先馬の所属カテゴリに合わせてラジオボタンも連動
         jump_filter = "トレセン在厩" if h_cat == "トレセン在厩" else "外厩ほか"
         st.session_state["radio_karte_filter"] = jump_filter
-        st.session_state["karte_current_horse"] = jump_horse
-        st.session_state["karte_last_filter"] = jump_filter
+        st.session_state[f"sb_select_{jump_filter}"] = jump_horse
         is_jump = True
     else:
         is_jump = False
@@ -324,7 +327,8 @@ with tab_karte:
         "絞り込み表示",
         filter_options,
         horizontal=True,
-        key="radio_karte_filter"
+        key="radio_karte_filter",
+        on_change=on_filter_change
     )
 
     # 2. 選択されたフィルターに基づく対象馬の抽出
@@ -344,29 +348,22 @@ with tab_karte:
         # 4. 最多賞金獲得馬の取得
         top_prize_horse = get_top_prize_horse(sorted_names, horses)
 
-        # フィルターが切り替わった場合（または初回）、常に【最多賞金獲得馬】をセット
-        last_filter = st.session_state.get("karte_last_filter")
-        if not is_jump and (last_filter is None or last_filter != selected_filter):
-            st.session_state["karte_last_filter"] = selected_filter
-            st.session_state["karte_current_horse"] = top_prize_horse
+        # フィルターごとに独立したウィジェットキーを使用
+        sb_key = f"sb_select_{selected_filter}"
 
-        # 現在選択対象の馬
-        curr_horse = st.session_state.get("karte_current_horse")
-        if curr_horse not in sorted_names:
-            curr_horse = top_prize_horse
-            st.session_state["karte_current_horse"] = curr_horse
-
-        curr_idx = sorted_names.index(curr_horse) if curr_horse in sorted_names else 0
+        # 初期インデックスの決定（ジャンプ時はジャンプ馬、通常時・切り替え時は最多賞金馬）
+        if is_jump and jump_horse in sorted_names:
+            curr_idx = sorted_names.index(jump_horse)
+        else:
+            curr_idx = sorted_names.index(top_prize_horse) if top_prize_horse in sorted_names else 0
 
         # 馬名セレクター（五十音順、初期表示は最多賞金獲得馬）
-        # ※Streamlitのキー競合によるindex=0への意図しないリセットを防ぐため、key引数は指定せずindexで完全制御
         selected_name = st.selectbox(
             f"愛馬を選択 ({len(sorted_names)}頭 / 五十音順)",
             sorted_names,
-            index=curr_idx
+            index=curr_idx,
+            key=sb_key
         )
-        # ユーザーがプルダウンを手動で操作した場合はその馬を記録
-        st.session_state["karte_current_horse"] = selected_name
         st.session_state.selected_horse = selected_name
 
         horse = horses.get(selected_name, {})

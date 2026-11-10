@@ -218,6 +218,7 @@ with tab_track:
             # カルテへジャンプするボタン
             if st.button(f"🏇 {tw['horse_name']} のカルテを開く", key=f"btn_tw_{tw['horse_name']}", width="stretch"):
                 st.session_state.selected_horse = tw['horse_name']
+                st.session_state.jump_target_horse = tw['horse_name']
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
@@ -258,6 +259,7 @@ with tab_track:
             # カルテへジャンプするボタン
             if st.button(f"🏇 {cal['horse_name']} のカルテを開く", key=f"btn_cal_{cal['horse_name']}", width="stretch"):
                 st.session_state.selected_horse = cal['horse_name']
+                st.session_state.jump_target_horse = cal['horse_name']
                 st.rerun()
 
     st.markdown("<hr style='margin: 14px 0 10px 0;'>", unsafe_allow_html=True)
@@ -301,27 +303,31 @@ with tab_karte:
     filter_options = ["全現役馬", "トレセン在厩", "外厩ほか"]
 
     # セッションフィルターの初期化（デフォルトは「トレセン在厩」）
-    if "karte_filter" not in st.session_state:
-        st.session_state.karte_filter = "トレセン在厩"
+    if "radio_karte_filter" not in st.session_state:
+        st.session_state.radio_karte_filter = "トレセン在厩"
 
-    # もし他タブやリンクから選ばれた馬が「トレセン在厩」以外の場合、自動追従
-    curr_target = st.session_state.get("selected_horse", "")
-    if curr_target and curr_target in horses:
-        h_cat = horses[curr_target].get("category", "")
-        if st.session_state.karte_filter == "トレセン在厩" and h_cat != "トレセン在厩":
-            st.session_state.karte_filter = "外厩ほか"
+    # 他画面（出走バナー等）からの明示的なジャンプ遷移の判定
+    jump_horse = st.session_state.pop("jump_target_horse", None)
+    if jump_horse and jump_horse in horses:
+        h_cat = horses[jump_horse].get("category", "")
+        # ジャンプ先馬の所属カテゴリに合わせてラジオボタンも連動
+        st.session_state.radio_karte_filter = "トレセン在厩" if h_cat == "トレセン在厩" else "外厩ほか"
+        is_jump = True
+    else:
+        is_jump = False
 
-    # ラジオボタンのインデックス判定
-    default_f_idx = filter_options.index(st.session_state.karte_filter) if st.session_state.karte_filter in filter_options else 1
-
+    # ラジオボタンの描画
     selected_filter = st.radio(
         "絞り込み表示",
         filter_options,
-        index=default_f_idx,
         horizontal=True,
         key="radio_karte_filter"
     )
-    st.session_state.karte_filter = selected_filter
+
+    # フィルター切り替えの検知（前回と異なる場合は最多賞金馬へ自動リセット）
+    prev_filter = st.session_state.get("prev_karte_filter")
+    filter_changed = (prev_filter is not None and prev_filter != selected_filter)
+    st.session_state.prev_karte_filter = selected_filter
 
     # 2. 選択されたフィルターに基づく対象馬の抽出
     if selected_filter == "トレセン在厩":
@@ -337,15 +343,25 @@ with tab_karte:
     if not sorted_names:
         st.info("該当する愛馬はいません。")
     else:
-        # 4. デフォルト表示は最多賞金獲得馬（選択馬がリストにない場合のフォールバック）
+        # 4. 最多賞金獲得馬の取得
         top_prize_horse = get_top_prize_horse(sorted_names, horses)
-        
-        # 現在選択中の馬が絞り込みリストにない場合は、該当リスト内の最多賞金馬をデフォルトにする
-        if st.session_state.get("selected_horse") not in sorted_names:
-            st.session_state.selected_horse = top_prize_horse
 
-        curr_horse_name = st.session_state.selected_horse
-        curr_idx = sorted_names.index(curr_horse_name) if curr_horse_name in sorted_names else 0
+        # 表示する馬の決定ロジック（ユーザー指定: カルテ選択時・ラジオボタン絞り込み時は最多賞金馬を最優先）
+        if is_jump and jump_horse in sorted_names:
+            # 他画面のカード・バナーからジャンプした場合は、その馬を表示
+            target_horse = jump_horse
+        elif filter_changed or "sb_horse_select" not in st.session_state or st.session_state.get("selected_horse") not in sorted_names:
+            # ラジオボタンで絞り込みを切り替えた時、または初回表示時は【最多賞金獲得馬】を自動選択
+            target_horse = top_prize_horse
+        else:
+            # ユーザーが同一フィルター内で明示的にselectboxを操作した場合はその馬を維持
+            target_horse = st.session_state.get("selected_horse", top_prize_horse)
+
+        # selectboxの内部キー状態も確実に同期更新して表示ブレを防止
+        st.session_state["sb_horse_select"] = target_horse
+        st.session_state.selected_horse = target_horse
+
+        curr_idx = sorted_names.index(target_horse) if target_horse in sorted_names else 0
 
         # 馬名セレクター（五十音順）
         selected_name = st.selectbox(

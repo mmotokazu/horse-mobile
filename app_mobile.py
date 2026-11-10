@@ -112,11 +112,35 @@ st.markdown("""
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
 }
-/* タブのスタイル調整 */
-button[data-baseweb="tab"] {
-    font-size: 1.0rem !important;
-    font-weight: 800 !important;
-    padding: 8px 16px !important;
+/* ナビゲーションタブ（iOSセグメントコントロール風デザイン） */
+div[data-testid="stRadio"]:has(input[name="nav_tab_radio"]) > div[role="radiogroup"] {
+    background: #e2e8f0;
+    padding: 4px;
+    border-radius: 10px;
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+}
+div[data-testid="stRadio"]:has(input[name="nav_tab_radio"]) label {
+    flex: 1;
+    text-align: center;
+    background: transparent;
+    padding: 9px 12px;
+    border-radius: 7px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #475569;
+    justify-content: center;
+    cursor: pointer;
+    border: none !important;
+}
+div[data-testid="stRadio"]:has(input[name="nav_tab_radio"]) label:has(input:checked) {
+    background: white;
+    color: #0f172a !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+div[data-testid="stRadio"]:has(input[name="nav_tab_radio"]) [data-testid="stWidgetSelectionContainer"] {
+    display: none !important;
 }
 /* カードのタップ演出 */
 .mobile-card {
@@ -168,19 +192,35 @@ if "selected_horse" not in st.session_state:
     tc_names = [k for k, v in horses.items() if v.get("category") == "トレセン在厩"]
     st.session_state.selected_horse = get_top_prize_horse(tc_names, horses) or get_top_prize_horse(list(horses.keys()), horses)
 
+# ----------------------------------------------------
+# 画面ナビゲーション（セッション連動・プログラム切替可能タブ）
+# ----------------------------------------------------
+NAV_TABS = ["🎯 出走予定 ＆ 動向", "🏇 愛馬カルテ"]
+
+if "nav_tab_radio" not in st.session_state:
+    st.session_state["nav_tab_radio"] = NAV_TABS[0]
+
 # クエリパラメータ連動
 query_params = st.query_params
 if "horse" in query_params and query_params["horse"] in horses:
+    st.session_state["nav_tab_radio"] = NAV_TABS[1]
     st.session_state.selected_horse = query_params["horse"]
+    st.session_state.jump_target_horse = query_params["horse"]
 
-# 2大タブ構成
-tab_track, tab_karte = st.tabs(["🎯 出走予定 ＆ 動向", "🏇 愛馬カルテ"])
+# 上部タブナビゲーション（iOSセグメント風・プログラム切替対応）
+current_nav_tab = st.radio(
+    "画面ナビゲーション",
+    NAV_TABS,
+    horizontal=True,
+    label_visibility="collapsed",
+    key="nav_tab_radio"
+)
 
 
 # ====================================================
-# 【タブ1】🎯 出走予定 ＆ 動向ボード
+# 【画面1】🎯 出走予定 ＆ 動向ボード
 # ====================================================
-with tab_track:
+if current_nav_tab == NAV_TABS[0]:
     # 1. 🔥 今週出走プレミアムバナー
     if this_week_horses:
         st.markdown("""
@@ -214,10 +254,13 @@ with tab_track:
             </div>
             """, unsafe_allow_html=True)
 
-            # カルテへジャンプするボタン
+            # カルテへジャンプするボタン（ユーザー指定: 全現役馬の該当馬を開く）
             if st.button(f"🏇 {tw['horse_name']} のカルテを開く", key=f"btn_tw_{tw['horse_name']}", width="stretch"):
-                st.session_state.selected_horse = tw['horse_name']
+                st.session_state["nav_tab_radio"] = NAV_TABS[1]
+                st.session_state["radio_karte_filter"] = "全現役馬"
                 st.session_state.jump_target_horse = tw['horse_name']
+                st.session_state.selected_horse = tw['horse_name']
+                st.session_state.pop("sb_select_全現役馬", None)
                 st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
@@ -255,10 +298,13 @@ with tab_track:
             </div>
             """, unsafe_allow_html=True)
 
-            # カルテへジャンプするボタン
+            # カルテへジャンプするボタン（ユーザー指定: 全現役馬の該当馬を開く）
             if st.button(f"🏇 {cal['horse_name']} のカルテを開く", key=f"btn_cal_{cal['horse_name']}", width="stretch"):
-                st.session_state.selected_horse = cal['horse_name']
+                st.session_state["nav_tab_radio"] = NAV_TABS[1]
+                st.session_state["radio_karte_filter"] = "全現役馬"
                 st.session_state.jump_target_horse = cal['horse_name']
+                st.session_state.selected_horse = cal['horse_name']
+                st.session_state.pop("sb_select_全現役馬", None)
                 st.rerun()
 
     st.markdown("<hr style='margin: 14px 0 10px 0;'>", unsafe_allow_html=True)
@@ -295,9 +341,9 @@ with tab_track:
 
 
 # ====================================================
-# 【タブ2】🏇 愛馬カルテ（戦績 ＆ 3ヶ月近況）
+# 【画面2】🏇 愛馬カルテ（戦績 ＆ 3ヶ月近況）
 # ====================================================
-with tab_karte:
+else:
     # 1. 滞在拠点ラジオボタンフィルター（ユーザー指定: トレセン在厩（先頭・デフォルト）、外厩ほか、全現役馬）
     filter_options = ["トレセン在厩", "外厩ほか", "全現役馬"]
 
@@ -307,13 +353,11 @@ with tab_karte:
         for opt in filter_options:
             st.session_state.pop(f"sb_select_{opt}", None)
 
-    # 他画面（出走バナー等）からの明示的なジャンプ遷移の処理
+    # 他画面（出走バナー等）からの明示的なジャンプ遷移の処理（ユーザー指定: 全現役馬の該当馬を開く）
     jump_horse = st.session_state.pop("jump_target_horse", None)
     if jump_horse and jump_horse in horses:
-        h_cat = horses[jump_horse].get("category", "")
-        jump_filter = "トレセン在厩" if h_cat == "トレセン在厩" else "外厩ほか"
-        st.session_state["radio_karte_filter"] = jump_filter
-        st.session_state[f"sb_select_{jump_filter}"] = jump_horse
+        st.session_state["radio_karte_filter"] = "全現役馬"
+        st.session_state.pop("sb_select_全現役馬", None)
         is_jump = True
     else:
         is_jump = False

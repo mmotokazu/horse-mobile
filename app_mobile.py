@@ -222,12 +222,17 @@ with tab_track:
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # 2. 📅 直近出走スケジュール一覧
+    # 2. 📅 直近出走スケジュール一覧（ドメイン規約第6項準拠: 特設バナー選出馬は自動除外して重複を完全防止）
     st.markdown("<h4 style='margin:12px 0 6px 0; color:#1e293b;'>📅 直近出走カレンダー</h4>", unsafe_allow_html=True)
-    if not upcoming_calendar:
-        st.info("現在予定されているレースはありません。")
+    
+    # 今週出走確定バナーに選出された愛馬を通常カレンダーから自動除外
+    tw_names = set(tw.get("horse_name") for tw in this_week_horses)
+    calendar_horses = [cal for cal in upcoming_calendar if cal.get("horse_name") not in tw_names]
+
+    if not calendar_horses:
+        st.info("現在、来週以降に予定されているレースはありません。")
     else:
-        for cal in upcoming_calendar:
+        for cal in calendar_horses:
             theme = get_club_theme(cal.get("club", ""))
             j_txt = f" / {cal['jockey']}" if cal.get("jockey") else ""
             date_badge = f"📅 {cal['date_badge']}" if cal.get("date_badge") else "🎯 開催目標"
@@ -249,6 +254,11 @@ with tab_track:
             </div>
             </div>
             """, unsafe_allow_html=True)
+
+            # カルテへジャンプするボタン
+            if st.button(f"🏇 {cal['horse_name']} のカルテを開く", key=f"btn_cal_{cal['horse_name']}", width="stretch"):
+                st.session_state.selected_horse = cal['horse_name']
+                st.rerun()
 
     st.markdown("<hr style='margin: 14px 0 10px 0;'>", unsafe_allow_html=True)
 

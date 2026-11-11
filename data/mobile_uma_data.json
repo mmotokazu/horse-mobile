@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "last_updated": "2026-11-11 22:42:42",
+    "last_updated": "2026-11-11 22:43:43",
     "total_active_horses": 29,
     "version": "1.0.0"
   },
@@ -31,7 +31,7 @@
       "horse_name": "アクアマーズ",
       "club": "シルクホースクラブ",
       "facility": "美浦トレセン",
-      "target_race": "11月15日 東京3歳上1勝C・ダ1600m",
+      "target_race": "11月15日 東京6R 3歳上1勝C・ダ1600m",
       "jockey": "A.プーシャン騎手",
       "mention_date": "2026/11/15",
       "sort_key": "2026-11-15",
@@ -68,7 +68,7 @@
       "horse_name": "アクアマーズ",
       "club": "シルクホースクラブ",
       "facility": "美浦トレセン",
-      "target_race": "11月15日 東京3歳上1勝C・ダ1600m",
+      "target_race": "11月15日 東京6R 3歳上1勝C・ダ1600m",
       "jockey": "A.プーシャン騎手",
       "mention_date": "2026/11/15",
       "sort_key": "2026-11-15",
@@ -153,7 +153,7 @@
         "facility": "美浦トレセン",
         "trainer": "美浦・浅利英明",
         "weight": "496kg",
-        "target_race": "11月15日 東京3歳上1勝C・ダ1600m"
+        "target_race": "11月15日 東京6R 3歳上1勝C・ダ1600m"
       },
       {
         "horse_name": "インディヴァイン",
@@ -2380,7 +2380,7 @@
       "latest_date": "2026/11/08",
       "weight": "496kg",
       "snippet": "＜調教＞助  手 美浦坂良 58.9 - 43.2 - 28.2 - 14.0 馬ナリ",
-      "target_race": "11月15日 東京3歳上1勝C・ダ1600m",
+      "target_race": "11月15日 東京6R 3歳上1勝C・ダ1600m",
       "target_jockey": "A.プーシャン騎手",
       "target_sort_key": "2026-11-15",
       "target_date_badge": "11/15",
@@ -2496,7 +2496,7 @@
         {
           "date": "2026/11/15",
           "place": "東京",
-          "round": "",
+          "round": "6",
           "race_name": "3歳上1勝C",
           "race_class": "1勝クラス",
           "distance_raw": "ダ1600m",

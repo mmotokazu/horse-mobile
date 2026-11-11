@@ -1,10 +1,21 @@
 {
   "metadata": {
-    "last_updated": "2026-11-11 20:31:22",
+    "last_updated": "2026-11-11 22:17:15",
     "total_active_horses": 29,
     "version": "1.0.0"
   },
   "this_week_horses": [
+    {
+      "horse_name": "プリュノワール",
+      "club": "シルクホースクラブ",
+      "facility": "美浦トレセン",
+      "target_race": "11月14日 福島6R 3歳上1勝C・芝1200m",
+      "jockey": "",
+      "mention_date": "2026/11/14",
+      "sort_key": "2026-11-14",
+      "date_badge": "11/14",
+      "countdown_label": "🔥 あと3日！"
+    },
     {
       "horse_name": "ルージュアズライト",
       "club": "東京サラブレッドクラブ",
@@ -29,6 +40,18 @@
     }
   ],
   "upcoming_calendar": [
+    {
+      "horse_name": "プリュノワール",
+      "club": "シルクホースクラブ",
+      "facility": "美浦トレセン",
+      "target_race": "11月14日 福島6R 3歳上1勝C・芝1200m",
+      "jockey": "",
+      "mention_date": "2026/11/14",
+      "sort_key": "2026-11-14",
+      "date_badge": "11/14",
+      "is_this_week": true,
+      "countdown_label": "🔥 あと3日！"
+    },
     {
       "horse_name": "ルージュアズライト",
       "club": "東京サラブレッドクラブ",
@@ -146,7 +169,7 @@
         "facility": "美浦トレセン",
         "trainer": "美浦・浅利英明⇐鹿戸雄一",
         "weight": "-",
-        "target_race": null
+        "target_race": "11月14日 福島6R 3歳上1勝C・芝1200m"
       },
       {
         "horse_name": "ミラージュスター",
@@ -1273,7 +1296,7 @@
           "place": "京都",
           "round": "9",
           "race_name": "北野特別",
-          "race_class": "特別/その他",
+          "race_class": "2勝クラス",
           "distance_raw": "芝2000m",
           "surface": "芝",
           "rank": 4,
@@ -1421,10 +1444,10 @@
       "latest_date": "2026/11/07",
       "weight": "-",
       "snippet": "＜レースレポート＞斎藤新騎手「返し馬から落ち着きがあって雰囲気が良かったですし、ゲートの駐立も悪さをすることはなかったですね。今回はスタートもしっかり決まりました。道中のペースは思ったよりも落ち...",
-      "target_race": null,
+      "target_race": "11月14日 福島6R 3歳上1勝C・芝1200m",
       "target_jockey": "",
-      "target_sort_key": "9999-99-99",
-      "target_date_badge": "",
+      "target_sort_key": "2026-11-14",
+      "target_date_badge": "11/14",
       "races": [
         {
           "date": "2024/05/18",
@@ -1659,6 +1682,24 @@
           "last3f": "35.7",
           "passing": "8-5",
           "weight": "460"
+        },
+        {
+          "date": "2026/11/14",
+          "place": "福島",
+          "round": "6",
+          "race_name": "3歳上1勝C",
+          "race_class": "1勝クラス",
+          "distance_raw": "芝1200m",
+          "surface": "芝",
+          "rank": null,
+          "rank_disp": "",
+          "jockey": "",
+          "popularity": "",
+          "time": "",
+          "margin": "",
+          "last3f": "",
+          "passing": "",
+          "weight": ""
         }
       ],
       "diaries": [
@@ -3215,7 +3256,7 @@
           "place": "福島",
           "round": "9",
           "race_name": "二本松特別",
-          "race_class": "特別/その他",
+          "race_class": "1勝クラス",
           "distance_raw": "芝1800m",
           "surface": "芝",
           "rank": 8,

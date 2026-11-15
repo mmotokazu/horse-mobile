@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "last_updated": "2026-11-15 13:09:09",
+    "last_updated": "2026-11-15 13:28:25",
     "total_active_horses": 28,
     "version": "1.0.0"
   },
@@ -58,9 +58,9 @@
       "horse_name": "バステール",
       "club": "シルクホースクラブ",
       "facility": "ノーザンファームしがらき",
-      "target_race": "12月27日の中山・有馬記念（ＧⅠ）",
+      "target_race": "12月27日 中山11R 有馬記念(G1)・芝2500m",
       "jockey": "川田将雅騎手",
-      "mention_date": "2026/11/13",
+      "mention_date": "2026/12/27",
       "sort_key": "2026-12-27",
       "date_badge": "12/27",
       "is_this_week": false,
@@ -209,7 +209,7 @@
         "facility": "ノーザンファームしがらき",
         "trainer": "栗東・斉藤崇史",
         "weight": "470kg",
-        "target_race": "12月27日の中山・有馬記念（ＧⅠ）"
+        "target_race": "12月27日 中山11R 有馬記念(G1)・芝2500m"
       },
       {
         "horse_name": "ベリルアンヴォル",
@@ -328,7 +328,7 @@
       "latest_date": "2026/11/13",
       "weight": "470kg",
       "snippet": "斉藤崇史調教師「今週、本馬を見させていただきましたが、順調にコースでの乗り込みを行えているようですね。そこで、次走について検討した結果、12月27日の中山・有馬記念（ＧⅠ）へ向かうことにいたしました。なお、鞍上は引...",
-      "target_race": "12月27日の中山・有馬記念（ＧⅠ）",
+      "target_race": "12月27日 中山11R 有馬記念(G1)・芝2500m",
       "target_jockey": "川田将雅騎手",
       "target_sort_key": "2026-12-27",
       "target_date_badge": "12/27",
@@ -458,6 +458,24 @@
           "last3f": "34.9",
           "passing": "16-16-16-12",
           "weight": "464"
+        },
+        {
+          "date": "2026/12/27",
+          "place": "中山",
+          "round": "11",
+          "race_name": "有馬記念(G1)",
+          "race_class": "G1",
+          "distance_raw": "芝2500m",
+          "surface": "芝",
+          "rank": null,
+          "rank_disp": "",
+          "jockey": "川田将雅",
+          "popularity": "",
+          "time": "",
+          "margin": "",
+          "last3f": "",
+          "passing": "",
+          "weight": ""
         }
       ],
       "diaries": [

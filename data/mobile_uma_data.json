@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "last_updated": "2026-11-19 23:07:36",
+    "last_updated": "2026-11-19 23:11:02",
     "total_active_horses": 27,
     "version": "1.0.0"
   },
@@ -9,9 +9,9 @@
       "horse_name": "コルキス",
       "club": "キャロットクラブ",
       "facility": "栗東トレセン",
-      "target_race": "11月２１日の福島競馬（２歳未勝利・ダ１７００ｍ）",
-      "jockey": "西村騎手",
-      "mention_date": "2026/11/19",
+      "target_race": "11月21日 福島2歳未勝利・ダ1700m",
+      "jockey": "西村淳也騎手",
+      "mention_date": "2026/11/21",
       "sort_key": "2026-11-21",
       "date_badge": "11/21",
       "countdown_label": "⚡ 明後日出走！"
@@ -26,6 +26,17 @@
       "sort_key": "2026-11-22",
       "date_badge": "11/22",
       "countdown_label": "🔥 あと3日！"
+    },
+    {
+      "horse_name": "スカイスプレンダー",
+      "club": "シルクホースクラブ",
+      "facility": "栗東トレセン",
+      "target_race": "11月23日 東京9R レジェンドジョッキーC・芝2400m",
+      "jockey": "岩田望来騎手",
+      "mention_date": "2026/11/23",
+      "sort_key": "2026-11-23",
+      "date_badge": "11/23",
+      "countdown_label": "🔥 あと4日！"
     }
   ],
   "upcoming_calendar": [
@@ -33,9 +44,9 @@
       "horse_name": "コルキス",
       "club": "キャロットクラブ",
       "facility": "栗東トレセン",
-      "target_race": "11月２１日の福島競馬（２歳未勝利・ダ１７００ｍ）",
-      "jockey": "西村騎手",
-      "mention_date": "2026/11/19",
+      "target_race": "11月21日 福島2歳未勝利・ダ1700m",
+      "jockey": "西村淳也騎手",
+      "mention_date": "2026/11/21",
       "sort_key": "2026-11-21",
       "date_badge": "11/21",
       "is_this_week": true,
@@ -52,6 +63,18 @@
       "date_badge": "11/22",
       "is_this_week": true,
       "countdown_label": "🔥 あと3日！"
+    },
+    {
+      "horse_name": "スカイスプレンダー",
+      "club": "シルクホースクラブ",
+      "facility": "栗東トレセン",
+      "target_race": "11月23日 東京9R レジェンドジョッキーC・芝2400m",
+      "jockey": "岩田望来騎手",
+      "mention_date": "2026/11/23",
+      "sort_key": "2026-11-23",
+      "date_badge": "11/23",
+      "is_this_week": true,
+      "countdown_label": "🔥 あと4日！"
     },
     {
       "horse_name": "インディヴァイン",
@@ -146,7 +169,7 @@
         "facility": "栗東トレセン",
         "trainer": "栗東・須貝尚介",
         "weight": "-",
-        "target_race": "11月２１日の福島競馬（２歳未勝利・ダ１７００ｍ）"
+        "target_race": "11月21日 福島2歳未勝利・ダ1700m"
       },
       {
         "horse_name": "スカイスプレンダー",
@@ -154,7 +177,7 @@
         "facility": "栗東トレセン",
         "trainer": "美浦・池江泰寿",
         "weight": "-",
-        "target_race": null
+        "target_race": "11月23日 東京9R レジェンドジョッキーC・芝2400m"
       },
       {
         "horse_name": "ルージュラボルタ",
@@ -664,10 +687,10 @@
       "latest_date": "2026/11/19",
       "weight": "-",
       "snippet": "池江泰寿調教師「脚元に負担がかからないように立ち上げてきましたが、その後も状態に変わりはありませんでした。先週末に坂路コースを15-14程度で登坂したところ、動きは軽快で、その後も右前繋靭帯の状態はすっきりしていま...",
-      "target_race": null,
-      "target_jockey": "",
-      "target_sort_key": "9999-99-99",
-      "target_date_badge": "",
+      "target_race": "11月23日 東京9R レジェンドジョッキーC・芝2400m",
+      "target_jockey": "岩田望来騎手",
+      "target_sort_key": "2026-11-23",
+      "target_date_badge": "11/23",
       "races": [
         {
           "date": "2025/11/23",
@@ -758,6 +781,24 @@
           "last3f": "34.3",
           "passing": "2-2-2-2",
           "weight": "482"
+        },
+        {
+          "date": "2026/11/23",
+          "place": "東京",
+          "round": "9",
+          "race_name": "レジェンドジョッキーC",
+          "race_class": "特別/その他",
+          "distance_raw": "芝2400m",
+          "surface": "芝",
+          "rank": null,
+          "rank_disp": "",
+          "jockey": "岩田望来",
+          "popularity": "",
+          "time": "",
+          "margin": "",
+          "last3f": "",
+          "passing": "",
+          "weight": ""
         }
       ],
       "diaries": [
@@ -4319,8 +4360,8 @@
       "latest_date": "2026/11/19",
       "weight": "-",
       "snippet": "２１日の福島競馬（２歳未勝利・ダ１７００ｍ）に西村騎手で出走いたします。",
-      "target_race": "11月２１日の福島競馬（２歳未勝利・ダ１７００ｍ）",
-      "target_jockey": "西村騎手",
+      "target_race": "11月21日 福島2歳未勝利・ダ1700m",
+      "target_jockey": "西村淳也騎手",
       "target_sort_key": "2026-11-21",
       "target_date_badge": "11/21",
       "races": [
@@ -4341,6 +4382,24 @@
           "last3f": "38.0",
           "passing": "2-2-2-2",
           "weight": "456"
+        },
+        {
+          "date": "2026/11/21",
+          "place": "福島",
+          "round": "",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "distance_raw": "ダ1700m",
+          "surface": "ダート",
+          "rank": null,
+          "rank_disp": "",
+          "jockey": "西村淳也",
+          "popularity": "",
+          "time": "",
+          "margin": "",
+          "last3f": "",
+          "passing": "",
+          "weight": ""
         }
       ],
       "diaries": [
